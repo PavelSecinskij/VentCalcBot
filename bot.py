@@ -1,4 +1,6 @@
 import os
+from threading import Thread
+from flask import Flask
 from dotenv import load_dotenv
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
@@ -186,7 +188,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Что будем проверять?", reply_markup=get_main_menu_keyboard())
 
+
+# ================= ФЕЙКОВЫЙ ВЕБ-СЕРВЕР ДЛЯ RENDER =================
+flask_app = Flask('')
+
+@flask_app.route('/')
+def home():
+    return "Бот успешно запущен и работает!"
+
+def run_flask():
+    # Забираем порт, который выделит Render, или ставим 8000 по умолчанию
+    port = int(os.environ.get("PORT", 8000))
+    flask_app.run(host='0.0.0.0', port=port)
+
+
 def main():
+    # Запускаем веб-сервер Flask в фоновом отдельном потоке
+    Thread(target=run_flask).start()
+
+    # Запускаем самого Телеграм-бота
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
