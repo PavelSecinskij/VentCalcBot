@@ -1,0 +1,15 @@
+# Виртуальное окружение
+venv/
+
+# Секреты
+.env
+
+# Кэш Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
